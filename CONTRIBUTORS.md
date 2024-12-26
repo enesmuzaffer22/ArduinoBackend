@@ -1,3 +1,0 @@
-- [Muzaffer Enes YILDIRIM](https://github.com/MuzafferEnes)
-- [Mert TOSUN](https://github.com/mertt1010)
-- [Gökhan ALTUNDAL](https://github.com/GokhanALTUNDAL)
