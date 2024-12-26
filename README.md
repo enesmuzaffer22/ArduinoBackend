@@ -50,3 +50,9 @@ Feel free to fork the repository, submit issues, or create pull requests with su
 ## License
 
 This project is licensed under the MIT License.
+
+## Contributors
+
+- [Muzaffer Enes YILDIRIM](https://github.com/MuzafferEnes)
+- [Mert TOSUN](https://github.com/mertt1010)
+- [Gökhan ALTUNDAL](https://github.com/GokhanALTUNDAL)
