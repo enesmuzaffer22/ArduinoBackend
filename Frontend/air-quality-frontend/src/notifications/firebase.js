@@ -12,10 +12,16 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+export const messaging = getMessaging(app);
 
-getToken(messaging, {
-  vapidKey: import.meta.env.VITE_VAPID_KEY,
-});
+export const generateToken = async () => {
+  const permission = await Notification.requestPermission();
+  console.log(permission);
 
-export default firebaseConfig;
+  if (permission === "granted") {
+    const token = await getToken(messaging, {
+      vapidKey: import.meta.env.VITE_APP_VAPID_KEY,
+    });
+    console.log(token);
+  }
+};
