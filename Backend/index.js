@@ -5,46 +5,12 @@ const path = require("path");
 const admin = require("firebase-admin");
 const app = express();
 const port = 3000; // Server port
-const swaggerUi = require("swagger-ui-express");
-const swaggerJsDoc = require("swagger-jsdoc");
 const cors = require("cors");
+const { getMessaging } = require("firebase-admin/messaging");
 
 app.use(cors());
 
-// Swagger configuration
-const swaggerOptions = {
-  definition: {
-    openapi: "3.0.0",
-    info: {
-      title: "Air Quality API",
-      version: "1.0.0",
-      description: "API for managing air quality data",
-    },
-    servers: [
-      { url: "http://localhost:3000" }, // Replace with your server URL
-    ],
-  },
-  apis: [__filename], // This file will contain Swagger annotations
-};
-
-// Initialize Swagger docs
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-
-// Firebase Admin SDK initialization
-const serviceAccount = {
-  type: "service_account",
-  project_id: process.env.FIREBASE_PROJECT_ID,
-  private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
-  private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-  client_email: process.env.FIREBASE_CLIENT_EMAIL,
-  client_id: process.env.FIREBASE_CLIENT_ID,
-  auth_uri: "https://accounts.google.com/o/oauth2/auth",
-  token_uri: "https://oauth2.googleapis.com/token",
-  auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
-  client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${process.env.FIREBASE_CLIENT_EMAIL}`,
-  universe_domain: "googleapis.com",
-};
+var serviceAccount = require("./serviceAccountKey.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -118,38 +84,32 @@ app.post("/api/air-quality", (req, res) => {
 });
 
 // Function to send a Firebase notification
-function sendNotification(value, timestamp) {
-  const message = {
-    notification: {
-      title: "Air Quality Alert!",
-      body: `The air quality index is ${value} as of ${timestamp}. It exceeds the safe threshold.`,
-    },
-  };
+async function sendNotification(value, timestamp) {
+  try {
+    console.log("Reading tokens from file...");
 
-  // Read tokens from file
-  const tokens = JSON.parse(fs.readFileSync(tokensFilePath, "utf-8"));
+    const tokens = JSON.parse(fs.readFileSync(tokensFilePath, "utf-8"));
+    console.log("Tokens read:", tokens);
 
-  if (tokens.length > 0) {
-    tokens.forEach((token) => {
-      admin
-        .messaging()
-        .send({
-          token: token,
-          notification: message.notification,
-        })
-        .then((response) => {
-          console.log(
-            "Notification sent successfully to token:",
-            token,
-            response
-          );
-        })
-        .catch((error) => {
-          console.error("Error sending notification to token:", token, error);
-        });
-    });
-  } else {
-    console.log("No tokens available to send notification.");
+    const token = tokens[tokens.length - 1];
+    console.log("Preparing message for token:", token);
+
+    const message = {
+      notification: {
+        title: "Air Quality Alert!",
+        body: `The air quality index is ${value} as of ${timestamp}. It exceeds the safe threshold.`,
+      },
+      token: token,
+    };
+
+    console.log(message);
+
+    const response = await getMessaging().send(message);
+    console.log("Successfully sent message: ", response);
+
+    console.log("Successfully sent message: ", response);
+  } catch (error) {
+    console.error("Error sending message:", error);
   }
 }
 

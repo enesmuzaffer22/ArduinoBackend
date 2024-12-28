@@ -22,6 +22,24 @@ export const generateToken = async () => {
     const token = await getToken(messaging, {
       vapidKey: import.meta.env.VITE_APP_VAPID_KEY,
     });
+
+    if (token) {
+      try {
+        const response = await fetch("http://localhost:3000/save-token/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ token }),
+        });
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        console.log("Token saved successfully");
+      } catch (error) {
+        console.error("Error saving token:", error);
+      }
+    }
     console.log(token);
   }
 };
