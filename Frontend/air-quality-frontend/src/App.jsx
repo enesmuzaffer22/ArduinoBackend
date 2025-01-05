@@ -7,7 +7,13 @@ function App() {
   useEffect(() => {
     generateToken();
     onMessage(messaging, (payload) => {
-      console.log("Message recieved. ", payload);
+      console.log("Message received. ", payload);
+      if (Notification.permission === "granted") {
+        new Notification(payload.notification.title, {
+          body: payload.notification.body,
+          icon: payload.notification.icon,
+        });
+      }
     });
   }, []);
 

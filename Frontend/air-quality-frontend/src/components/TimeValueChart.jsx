@@ -58,7 +58,7 @@ const TimeValueChart = () => {
     fetchData();
 
     // 10 saniyede bir API'den veri çekme
-    const intervalId = setInterval(fetchData, 10000); // 10000ms = 10 saniye
+    const intervalId = setInterval(fetchData, 1000); // 1000ms = 1 saniye
 
     // Component unmount olduğunda interval'i temizleyin
     return () => clearInterval(intervalId);

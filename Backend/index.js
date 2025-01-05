@@ -32,7 +32,7 @@ if (!fs.existsSync(tokensFilePath)) {
 app.use(express.json());
 
 // Threshold value for air quality
-const THRESHOLD = 270;
+const THRESHOLD = 370;
 
 // Endpoint to save device token
 app.post("/save-token", (req, res) => {
@@ -84,33 +84,34 @@ app.post("/api/air-quality", (req, res) => {
 });
 
 // Function to send a Firebase notification
-async function sendNotification(value, timestamp) {
-  try {
-    console.log("Reading tokens from file...");
+function sendNotification(value, timestamp) {
+  console.log("Reading tokens from file...");
 
-    const tokens = JSON.parse(fs.readFileSync(tokensFilePath, "utf-8"));
-    console.log("Tokens read:", tokens);
+  const tokens = JSON.parse(fs.readFileSync(tokensFilePath, "utf-8"));
+  console.log("Tokens read:", tokens);
 
-    const token = tokens[tokens.length - 1];
-    console.log("Preparing message for token:", token);
+  const deviceToken = tokens[tokens.length - 1];
+  console.log("Preparing message for token:", deviceToken);
 
-    const message = {
-      notification: {
-        title: "Air Quality Alert!",
-        body: `The air quality index is ${value} as of ${timestamp}. It exceeds the safe threshold.`,
-      },
-      token: token,
-    };
+  const message = {
+    notification: {
+      title: "Hava Kalite Asistanı",
+      body: "Cihazın bulunduğu ortamın hava kalitesinde bir anormallik tespit edildi!",
+    },
+    token: deviceToken,
+  };
 
-    console.log(message);
+  console.log(message);
 
-    const response = await getMessaging().send(message);
-    console.log("Successfully sent message: ", response);
-
-    console.log("Successfully sent message: ", response);
-  } catch (error) {
-    console.error("Error sending message:", error);
-  }
+  admin
+    .messaging()
+    .send(message)
+    .then((response) => {
+      console.log("Notification sent successfully:", response);
+    })
+    .catch((error) => {
+      console.error("Error sending notification:", error);
+    });
 }
 
 // Endpoint to fetch air quality data for frontend
